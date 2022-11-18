@@ -1,0 +1,26 @@
+"""
+Module: 'cmath' on FiPy v1.11
+"""
+# MCU: (sysname='FiPy', nodename='FiPy', release='1.20.2.r6', version='v1.11-c5a0a97 on 2021-10-28', machine='FiPy with ESP32', lorawan='1.0.2', sigfox='1.0.1', pybytes='1.7.1')
+# Stubber: 1.3.2
+import sys
+from typing import SupportsComplex, SupportsFloat, SupportsIndex
+
+from typing_extensions import TypeAlias
+
+e = 2.718282
+pi = 3.141593
+
+_C = SupportsFloat | SupportsComplex | SupportsIndex | complex
+
+
+def cos(__z: _C) -> complex: ...
+def exp(__z: _C) -> complex: ...
+
+
+def log(__x: _C, __y_obj: _C = ...) -> complex: ...
+def phase(__z: _C) -> float: ...
+def polar(__z: _C) -> tuple[float, float]: ...
+def rect(__r: float, __phi: float) -> complex: ...
+def sin(__z: _C) -> complex: ...
+def sqrt(__z: _C) -> complex: ...
