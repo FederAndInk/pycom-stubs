@@ -984,7 +984,7 @@ class LoRa:
     def tx_power():
         ...
 
-    def __init__(self):
+    def __init__(self, mode, region=LoRa.EU868, frequency: float = None, tx_power: float = None, bandwidth=LoRa.BW_125KHZ, sf=7, preamble=8, coding_rate=LoRa.CODING_4_5, power_mode=LoRa.ALWAYS_ON, tx_iq=False, rx_iq=False, adr=False, public=True, tx_retries=2, device_class=LoRa.CLASS_A):
         '''
         Create and configure a LoRa object. See init for params of configuration.
         
