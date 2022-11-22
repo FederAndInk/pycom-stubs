@@ -7,6 +7,7 @@ Module: 'network' on FiPy v1.11
 from collections.abc import Callable
 from typing import Any, NamedTuple, overload
 
+
 class GATTCCharacteristic:
     def uuid(self) -> int | bytes:
         '''
@@ -965,23 +966,36 @@ class LoRa:
     TX_PACKET_EVENT = 2
     US915 = 8
 
-    def airtime():
+    def airtime(self):
         ...
 
-    def compliance_test():
+    def compliance_test(self):
         ...
 
-    def join_multicast_group():
+    def join_multicast_group(self):
         ...
 
-    def leave_multicast_group():
+    def leave_multicast_group(self):
         ...
 
-    def reset():
+    def reset(self):
         ...
 
     timeout = None
-    def tx_power():
+
+    @overload
+    def tx_power(self, power: int):
+        """
+        transmit power in dBm.
+        """
+        ...
+
+
+    @overload
+    def tx_power(self) -> int:
+        """
+        transmit power in dBm.
+        """
         ...
 
     def __init__(self, mode, region=LoRa.EU868, frequency: float = None, tx_power: float = None, bandwidth=LoRa.BW_125KHZ, sf=7, preamble=8, coding_rate=LoRa.CODING_4_5, power_mode=LoRa.ALWAYS_ON, tx_iq=False, rx_iq=False, adr=False, public=True, tx_retries=2, device_class=LoRa.CLASS_A):
