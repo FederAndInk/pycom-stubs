@@ -1515,3 +1515,6 @@ class BytesWarning(Warning):
 
 class ResourceWarning(Warning):
   ...
+
+def const(i: int) -> int:
+  ...
