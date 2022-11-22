@@ -5,8 +5,14 @@ Module: 'network' on FiPy v1.11
 # Stubber: 1.3.2
 
 from collections.abc import Callable
-from typing import Any, NamedTuple, overload
+from typing import Any, NamedTuple, TypeVar, overload
+from typing_extensions import Self
 
+_T = TypeVar("_T")
+
+class char_callback_data(NamedTuple):
+    event: int
+    value: bytes
 
 class GATTCCharacteristic:
     '''
@@ -65,30 +71,26 @@ class GATTCCharacteristic:
         '''
         ...
 
-    def callback(self, trigger=None, handler: Callable[[Any], None] =None, arg=None):
+    @overload
+    def callback(self, trigger, handler: Callable[[Self, char_callback_data], None]):
         '''
         Creates a callback that will be executed when any of the triggers occur. The arguments are:
 
-
-
         - `trigger` can be `Bluetooth.CHAR_NOTIFY_EVENT`.
-
         - `handler` is the function that will be executed when the callback is triggered.
-
         - `arg` is the argument that gets passed to the callback. If nothing is given, the characteristic object that owns the callback will be used.
 
-
-
         Beyond the `arg` a tuple (called `data` ) is also passed to `handler` . The tuple consists of (event, value), where `event` is the triggering event and `value` is the value strictly belonging to the `event` .
-
 
         We recommend getting both the `event` and new `value` of the characteristic via this tuple, and not via `characteristic.event()` and `characteristic.value()` calls in the context of the `handler` to make sure no event and value is lost.
         The reason behind this is that `characteristic.event()` and `characteristic.value()` return with the very last event received and with the current value of the characteristic, while the input parameters are always linked to the specific event triggering the `handler` . If the device is busy executing other operations,  the `handler` of an incoming event may not be called before the next event occurs and is processed.
 
-
         Usage example can be found under GATTSCharacteristic page.
-
         '''
+        ...
+
+    @overload
+    def callback(self, trigger, handler: Callable[[_T, char_callback_data], None], arg: _T):
         ...
 
 
@@ -256,26 +258,19 @@ class GATTSCharacteristic:
         '''
         ...
 
-    def callback(self, trigger=None, handler: Callable[[Any], None] = None, arg=None):
+    @overload
+    def callback(self, trigger, handler: Callable[[Self, char_callback_data], None]):
         '''
         Creates a callback that will be executed when any of the triggers occur. The arguments are:
 
-
-
         - `trigger` can be either `Bluetooth.CHAR_READ_EVENT` or `Bluetooth.CHAR_WRITE_EVENT` .
-
         - `handler` is the function that will be executed when the callback is triggered.
-
         - `arg` is the argument that gets passed to the callback. If nothing is given, the characteristic object that owns the callback will be used.
-
-
 
         Beyond the `arg` a tuple (called `data` ) is also passed to `handler` . The tuple consists of (event, value), where `event` is the triggering event and `value` is the value strictly belonging to the `event` in case of a WRITE event. If the `event` is not a WRITE event, the `value` has no meaning.
 
-
         We recommend getting both the `event` and new `value` of the characteristic via this tuple, and not via `characteristic.event()` and `characteristic.value()` calls in the context of the `handler` to make sure no event and value is lost.
         The reason behind this is that `characteristic.event()` and `characteristic.value()` return with the very last event received and with the current value of the characteristic, while the input parameters are always linked to the specific event triggering the `handler` . If the device is busy executing other operations,  the `handler` of an incoming event may not be called before the next event occurs and is processed.
-
 
         An example of how this can be implemented is shown below, via an example of advertising and creating services on the device:
 
@@ -319,6 +314,10 @@ class GATTSCharacteristic:
         char2_cb = chr2.callback(trigger=Bluetooth.CHAR_READ_EVENT, handler=char2_cb_handler)
         ```
         '''
+        ...
+
+    @overload
+    def callback(self, trigger, handler: Callable[[_T, char_callback_data], None], arg: _T):
         ...
 
 
@@ -386,28 +385,28 @@ class Bluetooth:
     bt.start_scan(-1)
 
     while True:
-    adv = bt.get_adv()
-    if adv and bt.resolve_adv_data(adv.data, Bluetooth.ADV_NAME_CMPL) == 'Heart Rate':
-        try:
-            conn = bt.connect(adv.mac)
-            services = conn.services()
-            for service in services:
-                time.sleep(0.050)
-                if type(service.uuid()) == bytes:
-                    print('Reading chars from service = {}'.format(service.uuid()))
-                else:
-                    print('Reading chars from service = %x' % service.uuid())
-                chars = service.characteristics()
-                for char in chars:
-                    if (char.properties() & Bluetooth.PROP_READ):
-                        print('char {} value = {}'.format(char.uuid(), char.read()))
-            conn.disconnect()
-            break
-        except:
-            print("Error while connecting or reading from the BLE device")
-            break
-    else:
-        time.sleep(0.050)
+        adv = bt.get_adv()
+        if adv and bt.resolve_adv_data(adv.data, Bluetooth.ADV_NAME_CMPL) == 'Heart Rate':
+            try:
+                conn = bt.connect(adv.mac)
+                services = conn.services()
+                for service in services:
+                    time.sleep(0.050)
+                    if type(service.uuid()) == bytes:
+                        print('Reading chars from service = {}'.format(service.uuid()))
+                    else:
+                        print('Reading chars from service = %x' % service.uuid())
+                    chars = service.characteristics()
+                    for char in chars:
+                        if (char.properties() & Bluetooth.PROP_READ):
+                            print('char {} value = {}'.format(char.uuid(), char.read()))
+                conn.disconnect()
+                break
+            except:
+                print("Error while connecting or reading from the BLE device")
+                break
+        else:
+            time.sleep(0.050)
     ```
 
     Bluetooth Low Energy (BLE)
@@ -718,24 +717,21 @@ class Bluetooth:
         '''
         ...
 
-
-    def callback(self, trigger=None, handler: Callable[[Any], None] =None, arg=None):
+    @overload
+    def callback(self, trigger, handler: Callable[[Self], None]):
         '''
         Creates a callback that will be executed when any of the triggers occurs. The arguments are:
 
-
-
         - `trigger` can be either `Bluetooth.NEW_ADV_EVENT `, `Bluetooth.CLIENT_CONNECTED `, or `Bluetooth.CLIENT_DISCONNECTED `
-
         - `handler` is the function that will be executed when the callback is triggered.
-
         - `arg `is the argument that gets passed to the callback. If nothing is given the bluetooth object itself is used.
 
-
-
         An example of how this may be used can be seen in the `bluetooth.events() `method.
-
         '''
+        ...
+
+    @overload
+    def callback(self, trigger, handler: Callable[[_T], None], arg: _T):
         ...
 
 
@@ -1318,11 +1314,10 @@ class LoRa:
         '''
         ...
 
-    def callback(self, trigger, handler=None, arg=None):
+    @overload
+    def callback(self, trigger, handler: Callable[[Self], None]):
         '''
         Specify a callback handler for the LoRa radio. The `trigger` types are
-
-
 
         - `LoRa.RX_PACKET_EVENT` is raised for every received packet
         - `LoRa.TX_PACKET_EVENT` is raised as soon as the packet transmission cycle ends, which includes the end of the receive windows. In the case of non-confirmed transmissions, this will occur at the end of the receive windows, but, in the case of confirmed transmissions, this event will only be raised if the `ack` is received.
@@ -1330,6 +1325,10 @@ class LoRa:
 
         An example of how this callback functions can be seen the in method `lora.events()` .
         '''
+        ...
+
+    @overload
+    def callback(self, trigger, handler: Callable[[_T], None], arg: _T):
         ...
 
     def ischannel_free(self, rssi_threshold) -> bool:
@@ -1408,7 +1407,7 @@ class LoRa:
 
     def cli(self, ip: str):
         '''
-        Send OpenThread CLI commands, the list is [here](https://github.com/openthread/openthread/tree/main/src/cli). The output is multiline string, having as line-endings the `\r\n` .
+        Send OpenThread CLI commands, the list is [here](https://github.com/openthread/openthread/tree/main/src/cli). The output is multiline string, having as line-endings the `\\r\\n` .
 
         ```bash
         >>> print(lora.cli("ipaddr"))
