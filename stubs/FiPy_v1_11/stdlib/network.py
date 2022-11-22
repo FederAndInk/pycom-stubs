@@ -319,7 +319,7 @@ class BluetoothServerService:
         '''
         ...
 
-    def characteristic(self, uuid, *, permissions: int, properties: int, value: int | str | bytes) -> GATTSCharacteristic:
+    def characteristic(self, uuid, *, permissions: int = None, properties: int = None, value: int | str | bytes = None) -> GATTSCharacteristic:
         '''
         Creates a new characteristic on the service. Returns an object of the class `GATTSCharacteristic` . The arguments are:
         
