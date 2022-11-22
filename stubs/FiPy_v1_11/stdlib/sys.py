@@ -23,4 +23,4 @@ stderr = None
 stdin = None
 stdout = None
 version = '3.4.0'
-version_info = None
+version_info = (3, 4, 0)
