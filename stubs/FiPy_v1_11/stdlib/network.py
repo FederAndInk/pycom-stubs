@@ -9,6 +9,11 @@ from typing import Any, NamedTuple, overload
 
 
 class GATTCCharacteristic:
+    '''
+    The smallest concept in GATT is the Characteristic, which encapsulates a single data point (though it may contain an array of related data, such as X/Y/Z values from a 3-axis accelerometer, longitude and latitude from a GPS, etc.).
+
+    The following class allows you to manage characteristics from a Client.
+    '''
     def uuid(self) -> int | bytes:
         '''
         Returns the UUID of the service. In the case of 16-bit or 32-bit long UUIDs, the value returned is an integer, but for 128-bit long UUIDs the value returned is a bytes object.
@@ -112,6 +117,11 @@ class GATTCCharacteristic:
         ...
 
 class GATTCService:
+    '''
+    Services are used to categorise data up into specific chunks of data known as characteristics. A service may have multiple characteristics, and each service has a unique numeric ID called a UUID.
+
+    The following class allows control over Client services.
+    '''
     def isprimary(self) -> bool:
         '''
         Returns `True` if the service is a primary one. `False` otherwise.
@@ -144,6 +154,9 @@ class GATTCService:
 
 
 class GATTCConnection:
+    '''
+    The GATT Client is the device that requests data from the server, otherwise known as the master device (commonly this might be a phone/tablet/PC). All transactions are initiated by the master, which receives a response from the slave.
+    '''
     def disconnect() -> None:
         '''
         Closes the BLE connection. Returns `None `.
@@ -202,6 +215,11 @@ class GATTCConnection:
         ...
 
 class GATTSCharacteristic:
+    '''
+    The smallest concept in GATT is the Characteristic, which encapsulates a single data point (though it may contain an array of related data, such as X/Y/Z values from a 3-axis accelerometer, longitude and latitude from a GPS, etc.).
+
+    The following class allows you to manage Server characteristics.
+    '''
     @overload
     def value(self) -> int | str | bytes:
         '''
@@ -305,6 +323,13 @@ class GATTSCharacteristic:
 
 
 class BluetoothServerService:
+    '''
+    The GATT Server allows the device to act as a peripheral and hold its own ATT lookup data, server & characteristic definitions. In this mode, the device acts as a slave and a master must initiate a request.
+
+    Services are used to categorise data up into specific chunks of data known as characteristics. A service may have multiple characteristics, and each service has a unique numeric ID called a UUID.
+
+    The following class allows control over Server services.
+    '''
     def start(self):
         '''
         Starts the service if not already started.
@@ -350,7 +375,47 @@ class ble_adv_data(NamedTuple):
     data: bytes
 
 class Bluetooth:
-    ''
+    '''
+    This class provides a driver for the Bluetooth radio in the module. Currently, only basic BLE functionality is available.
+    Quick Usage Example
+
+    ```python
+    from network import Bluetooth
+    import time
+    bt = Bluetooth()
+    bt.start_scan(-1)
+
+    while True:
+    adv = bt.get_adv()
+    if adv and bt.resolve_adv_data(adv.data, Bluetooth.ADV_NAME_CMPL) == 'Heart Rate':
+        try:
+            conn = bt.connect(adv.mac)
+            services = conn.services()
+            for service in services:
+                time.sleep(0.050)
+                if type(service.uuid()) == bytes:
+                    print('Reading chars from service = {}'.format(service.uuid()))
+                else:
+                    print('Reading chars from service = %x' % service.uuid())
+                chars = service.characteristics()
+                for char in chars:
+                    if (char.properties() & Bluetooth.PROP_READ):
+                        print('char {} value = {}'.format(char.uuid(), char.read()))
+            conn.disconnect()
+            break
+        except:
+            print("Error while connecting or reading from the BLE device")
+            break
+    else:
+        time.sleep(0.050)
+    ```
+
+    Bluetooth Low Energy (BLE)
+
+    Bluetooth low energy (BLE) is a subset of classic Bluetooth, designed for easy connecting and communicating between devices (in particular mobile platforms). BLE uses a methodology known as Generic Access Profile (GAP) to control connections and advertising.
+
+    GAP allows for devices to take various roles but generic flow works with devices that are either a Server (low power, resource constrained, sending small payloads of data) or a Client device (commonly a mobile device, PC or Pycom Device with large resources and processing power). Pycom devices can act as both a Client and a Server.
+    '''
     ADV_128SERVICE_DATA = 33
     ADV_128SRV_CMPL = 7
     ADV_128SRV_PART = 6
