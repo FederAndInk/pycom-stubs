@@ -1,5 +1,16 @@
 """
 Module: 'machine' on FiPy v1.11
+
+The machine module contains specific functions related to the board.
+Quick Usage Example
+
+```python
+import machine
+
+help(machine) # display all members from the machine module
+machine.freq() # get the CPU frequency
+machine.unique_id() # return the 6-byte unique id of the board (the LoPy's WiFi MAC address)
+```
 """
 # MCU: (sysname='FiPy', nodename='FiPy', release='1.20.2.r6', version='v1.11-c5a0a97 on 2021-10-28', machine='FiPy with ESP32', lorawan='1.0.2', sigfox='1.0.1', pybytes='1.7.1')
 # Stubber: 1.3.2
