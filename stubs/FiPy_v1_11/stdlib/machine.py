@@ -17,6 +17,7 @@ machine.unique_id() # return the 6-byte unique id of the board (the LoPy's WiFi 
 
 from typing import overload
 
+
 class ADC:
     ''
     ATTN_0DB = 0
@@ -231,9 +232,9 @@ class Pin:
     def __init__(self, id: str, mode=Pin.OUT, pull=None, alt=-1):
         '''
         Create a new Pin object associated with the string `id` . If additional arguments are given, they are used to initialise the pin. See pin.init()
-        
+
         ```python
-        
+
         from machine import Pin
         p = Pin('P10', mode=Pin.OUT, pull=None, alt=-1)
         ```
@@ -243,20 +244,20 @@ class Pin:
     def init(self, mode, pull, *, alt):
         '''
         Initialise the pin:
-        
+
         - `mode` can be one of:
             - `Pin.IN` - input pin.
             - `Pin.OUT` - output pin in push-pull mode.
             - `Pin.OPEN_DRAIN` - input or output pin in open-drain mode.
-        
+
         - `pull` can be one of:
             - `None` - no pull up or down resistor.
             - `Pin.PULL_UP` - pull up resistor enabled.
             - `Pin.PULL_DOWN` - pull down resistor enabled.
-        
+
         - `*`
             - Pin value: `0` or `1`
-        
+
         - `alt` is the id of the alternate function.
         Returns: `None` .
         '''
@@ -265,7 +266,7 @@ class Pin:
     def id(self):
         '''
         Get the pin id.
-        
+
         '''
         ...
 
@@ -273,9 +274,9 @@ class Pin:
     def value(self) -> bool | int:
         '''
         Get or set the digital logic level of the pin. This only works in `Pin.OUT` mode. Values can be:
-        
-        - `True` or 1: High 
-        - `False` or 0: Low 
+
+        - `True` or 1: High
+        - `False` or 0: Low
         '''
         ...
 
@@ -283,9 +284,9 @@ class Pin:
     def value(self, value: bool | int):
         '''
         Get or set the digital logic level of the pin. This only works in `Pin.OUT` mode. Values can be:
-        
-        - `True` or 1: High 
-        - `False` or 0: Low 
+
+        - `True` or 1: High
+        - `False` or 0: Low
         '''
         ...
 
@@ -293,18 +294,18 @@ class Pin:
     def __call__(self) -> bool | int:
         '''
         Pin objects are callable. The call method provides a (fast) shortcut to set and get the value of the pin.
-        
-        
+
+
         Example:
-        
+
         ```python
-        
+
         from machine import Pin
         pin = Pin('P12', mode=Pin.IN, pull=Pin.PULL_UP)
         pin()   # fast method to get the value
         ```
         See `pin.value()` for more details.
-        
+
         '''
         ...
 
@@ -312,25 +313,25 @@ class Pin:
     def __call__(self, value: bool | int):
         '''
         Pin objects are callable. The call method provides a (fast) shortcut to set and get the value of the pin.
-        
-        
+
+
         Example:
-        
+
         ```python
-        
+
         from machine import Pin
         pin = Pin('P12', mode=Pin.IN, pull=Pin.PULL_UP)
         pin()   # fast method to get the value
         ```
         See `pin.value()` for more details.
-        
+
         '''
         ...
 
     def toggle(self):
         '''
         Toggle the value of the pin.
-        
+
         '''
         ...
 
@@ -338,10 +339,10 @@ class Pin:
     def mode(self) -> int:
         '''
         Get or set the pin mode. Modes can be:
-        
-        - `Pin.IN` 
-        - `Pin.OUT` 
-        - `Pin.OPEN_DRAIN` 
+
+        - `Pin.IN`
+        - `Pin.OUT`
+        - `Pin.OPEN_DRAIN`
         '''
         ...
 
@@ -349,10 +350,10 @@ class Pin:
     def mode(self, mode: int):
         '''
         Get or set the pin mode. Modes can be:
-        
-        - `Pin.IN` 
-        - `Pin.OUT` 
-        - `Pin.OPEN_DRAIN` 
+
+        - `Pin.IN`
+        - `Pin.OUT`
+        - `Pin.OPEN_DRAIN`
         '''
         ...
 
@@ -360,10 +361,10 @@ class Pin:
     def pull(self) -> int:
         '''
         Get or set the pin pull. Pull can be:
-        
-        - `Pin.PULL_UP` 
-        - `Pin.PULL_DOWN` 
-        - `None` 
+
+        - `Pin.PULL_UP`
+        - `Pin.PULL_DOWN`
+        - `None`
         '''
         ...
 
@@ -371,21 +372,21 @@ class Pin:
     def pull(self, pull: int):
         '''
         Get or set the pin pull. Pull can be:
-        
-        - `Pin.PULL_UP` 
-        - `Pin.PULL_DOWN` 
-        - `None` 
+
+        - `Pin.PULL_UP`
+        - `Pin.PULL_DOWN`
+        - `None`
         '''
         ...
 
     @overload
     def hold(self, hold) -> bool:
         '''
-        Get or set the pin hold. This functionality can be used to hold a pin’s state after deepsleep, `machine.reset()` or a watchdog timer reset. Passing `True` will hold the current value of the pin, `False` will release the hold state. When a pin is in hold state, its value cannot be changed by using `Pin.value()` or `Pin.toggle()` , until the hold is released. Only pins in the RTC power domain can retain their value through deep sleep or reset. These are: `P2, P3, P4, P6, P8, P9, P10, P13, P14, P15, P16, P17, P18, P19, P20, P21, P22, P23` 
-        
-        
+        Get or set the pin hold. This functionality can be used to hold a pin’s state after deepsleep, `machine.reset()` or a watchdog timer reset. Passing `True` will hold the current value of the pin, `False` will release the hold state. When a pin is in hold state, its value cannot be changed by using `Pin.value()` or `Pin.toggle()` , until the hold is released. Only pins in the RTC power domain can retain their value through deep sleep or reset. These are: `P2, P3, P4, P6, P8, P9, P10, P13, P14, P15, P16, P17, P18, P19, P20, P21, P22, P23`
+
+
         You can use the following example:
-        
+
         ```python
         from machine import Pin
         import machine
@@ -395,33 +396,33 @@ class Pin:
         machine.reset()
         # instead, you can use:
         # machine.deepsleep(10000)
-        
+
         # P3 will still be high here
         ```
         A few things to keep in mind when using the pin hold functionality:
-        
-        
-        
+
+
+
         - This feature only preserves the pin value:
-            - During a (deep)sleep 
-            - After waking up from deepsleep 
-            - After `machine.reset()` 
-            - After a WDT reset 
-        
-        - The hold state itself is not preserved in Micropython after the above mentioned resets. This means that `pin.hold()` will return `False` after such reset, even though the pin is actually still held in hardware . 
-        - `pin.hold()` does not return the pin’s value. You can hold a pin high or low. 
-        - Applying a hard-reset, by for example pressing the reset button, will reset the pin value and release the hold. 
+            - During a (deep)sleep
+            - After waking up from deepsleep
+            - After `machine.reset()`
+            - After a WDT reset
+
+        - The hold state itself is not preserved in Micropython after the above mentioned resets. This means that `pin.hold()` will return `False` after such reset, even though the pin is actually still held in hardware .
+        - `pin.hold()` does not return the pin’s value. You can hold a pin high or low.
+        - Applying a hard-reset, by for example pressing the reset button, will reset the pin value and release the hold.
         '''
         ...
 
     @overload
     def hold(self, hold: bool):
         '''
-        Get or set the pin hold. This functionality can be used to hold a pin’s state after deepsleep, `machine.reset()` or a watchdog timer reset. Passing `True` will hold the current value of the pin, `False` will release the hold state. When a pin is in hold state, its value cannot be changed by using `Pin.value()` or `Pin.toggle()` , until the hold is released. Only pins in the RTC power domain can retain their value through deep sleep or reset. These are: `P2, P3, P4, P6, P8, P9, P10, P13, P14, P15, P16, P17, P18, P19, P20, P21, P22, P23` 
-        
-        
+        Get or set the pin hold. This functionality can be used to hold a pin’s state after deepsleep, `machine.reset()` or a watchdog timer reset. Passing `True` will hold the current value of the pin, `False` will release the hold state. When a pin is in hold state, its value cannot be changed by using `Pin.value()` or `Pin.toggle()` , until the hold is released. Only pins in the RTC power domain can retain their value through deep sleep or reset. These are: `P2, P3, P4, P6, P8, P9, P10, P13, P14, P15, P16, P17, P18, P19, P20, P21, P22, P23`
+
+
         You can use the following example:
-        
+
         ```python
         from machine import Pin
         import machine
@@ -431,51 +432,51 @@ class Pin:
         machine.reset()
         # instead, you can use:
         # machine.deepsleep(10000)
-        
+
         # P3 will still be high here
         ```
         A few things to keep in mind when using the pin hold functionality:
-        
-        
-        
+
+
+
         - This feature only preserves the pin value:
-            - During a (deep)sleep 
-            - After waking up from deepsleep 
-            - After `machine.reset()` 
-            - After a WDT reset 
-        
-        - The hold state itself is not preserved in Micropython after the above mentioned resets. This means that `pin.hold()` will return `False` after such reset, even though the pin is actually still held in hardware . 
-        - `pin.hold()` does not return the pin’s value. You can hold a pin high or low. 
-        - Applying a hard-reset, by for example pressing the reset button, will reset the pin value and release the hold. 
+            - During a (deep)sleep
+            - After waking up from deepsleep
+            - After `machine.reset()`
+            - After a WDT reset
+
+        - The hold state itself is not preserved in Micropython after the above mentioned resets. This means that `pin.hold()` will return `False` after such reset, even though the pin is actually still held in hardware .
+        - `pin.hold()` does not return the pin’s value. You can hold a pin high or low.
+        - Applying a hard-reset, by for example pressing the reset button, will reset the pin value and release the hold.
         '''
         ...
 
     def callback(self, trigger,handler=None,arg=None):
         '''
         Set a callback to be triggered when the input level at the pin changes.
-        
-        
-        
+
+
+
         - `trigger` is the type of event that triggers the callback. Possible values are:
-            - `Pin.IRQ_FALLING` interrupt on falling edge. 
-            - `Pin.IRQ_RISING` interrupt on rising edge. 
-            - `Pin.IRQ_LOW_LEVEL` interrupt on low level. 
-            - `Pin.IRQ_HIGH_LEVEL` interrupt on high level. 
-        
-        The values can be OR-ed together, for instance `trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING` 
-        
-        - `handler` is the function to be called when the event happens. This function will receive one argument. Set `handler` to `None` to disable it. 
-        - `arg` is an optional argument to pass to the callback. If left empty or set to `None` , the function will receive the Pin object that triggered it. 
-        
+            - `Pin.IRQ_FALLING` interrupt on falling edge.
+            - `Pin.IRQ_RISING` interrupt on rising edge.
+            - `Pin.IRQ_LOW_LEVEL` interrupt on low level.
+            - `Pin.IRQ_HIGH_LEVEL` interrupt on high level.
+
+        The values can be OR-ed together, for instance `trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING`
+
+        - `handler` is the function to be called when the event happens. This function will receive one argument. Set `handler` to `None` to disable it.
+        - `arg` is an optional argument to pass to the callback. If left empty or set to `None` , the function will receive the Pin object that triggered it.
+
         Example:
-        
+
         ```python
-        
+
         from machine import Pin
-        
+
         def pin_handler(arg):
             print("got an interrupt in pin %s" % (arg.id()))
-        
+
         p_in = Pin('P10', mode=Pin.IN, pull=Pin.PULL_UP)
         p_in.callback(Pin.IRQ_FALLING | Pin.IRQ_RISING, pin_handler)
         ```
