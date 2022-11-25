@@ -5,8 +5,8 @@ Module: 'network' on FiPy v1.11
 # Stubber: 1.3.2
 
 from collections.abc import Callable
-from typing import Any, NamedTuple, TypeVar, overload
-from typing_extensions import Self
+from typing import Any, NamedTuple, TypeVar, overload, Literal
+from typing_extensions import Self, Unpack, TypedDict, NotRequired
 
 _T = TypeVar("_T")
 
@@ -1490,12 +1490,41 @@ class Sigfox:
 
 
 class WLAN:
-    ''
-    AP = 2
+    '''
+    This class provides a driver for the WiFi network processor in the module. Example usage:
+
+    ```python
+    import network
+    import time
+    # setup as a station
+    wlan = network.WLAN(mode=network.WLAN.STA)
+    wlan.connect('your-ssid', auth=(network.WLAN.WPA2, 'your-key'))
+    while not wlan.isconnected():
+        time.sleep_ms(50)
+    print(wlan.ifconfig())
+
+    # now use socket as usual
+    ```
+
+    Quick Usage Example
+
+    ```python
+    import machine
+    from network import WLAN
+
+    # configure the WLAN subsystem in station mode (the default is AP)
+    wlan = WLAN(mode=WLAN.STA)
+    # go for fixed IP settings (IP, Subnet, Gateway, DNS)
+    wlan.ifconfig(config=('192.168.0.107', '255.255.255.0', '192.168.0.1', '192.168.0.1'))
+    wlan.scan()     # scan for available networks
+    wlan.connect(ssid='mynetwork', auth=(WLAN.WPA2, 'my_network_key'))
+    while not wlan.isconnected():
+        pass
+    print(wlan.ifconfig())
+    ```
+    '''
     COUNTRY_POL_AUTO = 0
     COUNTRY_POL_MAN = 1
-    def Connected_ap_pwd():
-        ...
 
     EVENT_PKT_ANY = 63
     EVENT_PKT_CTRL = 2
@@ -1529,96 +1558,659 @@ class WLAN:
     SECONDARY_CHN_NONE = 0
     SMART_CONF_DONE = 64
     SMART_CONF_TIMEOUT = 128
+
     STA = 1
+    AP = 2
     STA_AP = 3
+
     WEP = 1
     WPA = 2
     WPA2 = 3
     WPA2_ENT = 5
-    def antenna():
+
+    def __init__(self, id=0, *, mode: int = STA, ssid: str = "", auth: tuple[Literal[1, 2, 3], str] | tuple[Literal[5], str] | None = None, channel=1, antenna=MAN_ANT, power_save=False, hidden=False, bandwidth=HT40, max_tx_pwr=78, country='CN', protocol: tuple[bool, bool, bool] = (True, True, True)):
+        '''
+        Create a WLAN object, and optionally configure it. See init for params of configuration.
+
+        --------
+        The WLAN constructor is special in the sense that if no arguments are given, it will return the already existing WLAN instance without re-configuring it. This is because WLAN is a system feature of the WiPy. If the already existing instance is not initialised it will do the same as the other constructors and will initialise it with default values.
+        '''
         ...
 
-    def ap_sta_list():
+    def init(self, *, mode: int = STA, ssid: str = "", auth: tuple[Literal[1, 2, 3], str] | tuple[Literal[5], str] | None = None, channel=1, antenna=MAN_ANT, power_save=False, hidden=False, bandwidth=HT40, max_tx_pwr=78, country='CN', protocol: tuple[bool, bool, bool] = (True, True, True)):
+        '''
+        Set or get the WiFi network processor configuration.
+
+        Arguments are:
+
+        - `mode` : can be either:
+            - `WLAN.STA` : Station mode, connect to a WiFinetwork
+            - `WLAN.AP` : Access Point mode, create a WiFi network. You must specify the `ssid`
+            - `WLAN.STA_AP` : Both Station and Access Point mode are active.
+        - `ssid` : a string with the SSID name.
+        - `auth` : a tuple with `(sec, key)` . Security can be one of the following. The key is a string with the network password.
+            - `None` :
+            - `WLAN.WEP` : Using this in `WLAN.AP` , the key must be a string of hexadecimal values.
+            - `WLAN.WPA`
+            - `WLAN.WPA2`
+            - `WLAN.WPA2_ENT` : this will use the following format: `(sec, username, password)`
+        - `channel` : a number in the range 1-11. Only needed when mode is `WLAN.AP` .
+        - `antenna` : select between the internal and the external antenna. With our development boards it defaults to using the on-board antenna. Value can be either:
+            - `WLAN.INT_ANT` : The on-board antenna
+            - `WLAN.EXT_ANT` : The U.FL connector (external antenna)
+            - `WLAN.MAN_ANT` : Manually select the state of the antenna switch on `P12` . By default, this will select the on-board antenna
+        - `power_save` enables or disables power save functions in `WLAN.STA` mode.
+        - `hidden` : create a hidden SSID when set to `True` . only valid in `WLAN.AP` mode.
+        - `bandwidth` is the Bandwidth to use, either:
+            - `WLAN.HT20` : 20MHz
+            - `WLAN.HT40` : 40MHz
+        - `max_tx_pwr` is the maximum WiFi TX power allowed. see `WLAN.max_tx_power()` for more details
+        - `country` tuple representing the country configuration parameters. see `WLAN.country()` for more details
+        - `protocol` tuple representing the protocol. see `WLAN.wifi_protocol()` for more details
+        '''
         ...
 
-    def ap_tcpip_sta_list():
+    def deinit(self):
+        '''
+        Disables the WiFi radio.
+        '''
         ...
 
-    def auth():
+    def connect(self, ssid, *, auth: tuple[Literal[1, 2, 3], str] | tuple[Literal[5], str] | None = None, bssid: bytes | None = None, timeout: int | None = None, ca_certs: str | None = None, keyfile=None, certfile=None, identity=None, hostname=None):
+        r'''
+        Connect to a WiFi Access Point using the given SSID, and other parameters
+
+        - :param ssid: a string with the SSID name.
+        - :param auth: a tuple with `(sec, key)` . Security can be one of the following. The key is a string with the network password.
+            - `None` :
+            - `WLAN.WEP` : Using this in `WLAN.AP` , the key must be a string of hexadecimal values.
+            - `WLAN.WPA`
+            - `WLAN.WPA2`
+            - `WLAN.WPA2_ENT` : this will use the following format: `(sec, username, password)`
+        - :param bssid: is the MAC address of the AP to connect to. This is useful when there are several APs with the same SSID. The bssid is given as 6 Hexadecimal bytes literals (i.e `b'\xff\xff\xff\xff\xff\xff'` )
+        - :param timeout: is the maximum time in milliseconds to wait for the connection to succeed.
+        - :param ca_certs: is the path to the CA certificate. This argument is not mandatory.
+        - :param keyfile: is the path to the client key. Only used if `username` and `password` are not part of the `auth` tuple.
+        - :param certfile: is the path to the client certificate. Only used if `username` and `password` are not part of the `auth` tuple.
+        - :param identity: is only used in case of `WLAN.WPA2_ENT` security. Needed by the server.
+        - :param hostname: is the name of the host connecting to the AP. Max length of name string is 32 Bytes
+
+        --------
+        The ESP32 only handles certificates with `pkcs8` format (but not the “Traditional SSLeay RSAPrivateKey” format). The private key should be RSA coded with 2048 bits at maximum.
+        '''
         ...
 
-    def bandwidth():
+    class _Scan_result(NamedTuple):
+        ssid: str
+        bssid: bytes
+        sec: int
+        channel: int
+        rssi: int
+
+    def scan(self, *, ssid: str | None = None, bssid: bytes | None = None, channel=0, show_hidden=False, type=SCAN_ACTIVE, scantime: tuple[int, int] = (120, 120)) -> list[_Scan_result]:
+        r'''
+        Performs a network scan and returns a list of named tuples with (ssid, bssid, sec, channel, rssi). When no config args passed scan will be performed with default configurations.
+
+        Note: For Fast scan mode ssid/bssid and channel should be
+
+        - `ssid` : Scan only for the given ssid
+        - `bssid` : Scan only for the given bssid. The bssid is given as 6 Hexadecimal bytes literals (i.e `b'\xff\xff\xff\xff\xff\xff'` )
+        - `channel` : If set to 0, there will be an all-channel scan; otherwise, there will be a specific-channel scan.
+        - `show_hidden` : Scan for hidden ssid’s as well.
+        - `type` : The type of scan performed. Values can be
+            - `WLAN.SCAN_ACTIVE` : the scan is will be performed by sending a probe request.
+            - `WLAN.SCAN_PASSIVE` : switches to a specifi channel and waits for beacon
+        - `scantime` : This field is used to control how long the scan dwells on each channel. For active scans, dwell times for each channel are listed below. For passive scans, this designates the dwell time for each channel. scantime is given as a tuple for min and max times `(min,max)`
+            - min=0, max=0: scan dwells on each channel for 120 ms.
+            - min>0, max=0: scan dwells on each channel for 120 ms.
+            - min=0, max>0: scan dwells on each channel for max ms.
+            - min>0, max>0: The minimum time the scan dwells on each channel is min ms. If no AP is found during this time frame, the scan switches to the next channel. Otherwise, the scan dwells on the channel for max ms.If you want to improve the performance of the the scan, you can try to modify these two parameters.
+        '''
         ...
 
-    def bssid():
+    def disconnect(self):
+        '''
+        Disconnect from the WiFi access point.
+        '''
         ...
 
-    def callback():
+    def isconnected(self) -> bool:
+        '''
+        - In case of STA mode, returns `True` if connected to a WiFi access point and has a valid IP address.
+        - In AP mode returns `True` when a station is connected, `False` otherwise.
+        '''
         ...
 
-    def channel():
+    @overload
+    def ifconfig(self, id: Literal[0, 1] = 0) -> tuple[str, str, str, str]:
+        '''
+        - When `id` is 0, the configuration will be get/set on the Station interface.
+        - When `id` is 1 the configuration will be done for the AP interface.
+
+        Get the interface configuration: (ip, netmask, gateway, dns)
+        '''
         ...
 
-    def connect():
+    @overload
+    def ifconfig(self, id: Literal[0, 1] = 0, config: Literal['dhcp'] | tuple[str, str, str, str] | None = None):
+        '''
+        - When `id` is 0, the configuration will be get/set on the Station interface.
+        - When `id` is 1 the configuration will be done for the AP interface.
+
+        Set the interface configuration.
+
+        Optionally specify the configuration parameter:
+        - `config='dhcp'` : If 'dhcp' is passed as a parameter, then the DHCP client is enabled and the IP parameters are negotiated with the DHCP server.
+        - `config=(ip, netmask, gateway, dns)` : If the 4-tuple config is given then a static IP is configured.
+
+        For example: `eth.ifconfig(config=('192.168.0.4', '255.255.255.0', '192.168.0.1', '8.8.8.8'))` .
+        '''
         ...
 
-    def country():
+    def ifconfig(self, id: Literal[0, 1] = 0, config: Literal['dhcp'] | tuple[str, str, str, str] | None = None) -> tuple[str, str, str, str] | None:
         ...
 
-    def ctrl_pkt_filter():
+    @overload
+    def mode(self) -> int:
+        '''
+        Get or set the WLAN mode.
+        '''
         ...
 
-    def deinit():
+    @overload
+    def mode(self, mode: int):
+        '''
+        Get or set the WLAN mode.
+        '''
         ...
 
-    def disconnect():
+    def mode(self, mode: int | None = None) -> int | None:
         ...
 
-    def events():
+    @overload
+    def ssid(self) -> str:
+        '''
+        Get the SSID.
+
+        In case if mode = `WLAN.STA` this method can get the ssid of AP the board is connected to.
+        In case of mode = `WLAN.AP` this method can get the ssid of the board’s own AP.
+        In case of mode = `WLAN.STA_AP` this method can get the ssid of board’s own AP plus the AP the STA is connected to in form of a tuple:
+        '''
         ...
 
-    def hostname():
+    @overload
+    def ssid(self, ssid: str):
+        '''
+        Set the SSID (Set SSID of AP).
+
+        In case if mode = `WLAN.STA` this method can get the ssid of AP the board is connected to.
+        In case of mode = `WLAN.AP` this method can get the ssid of the board’s own AP.
+        In case of mode = `WLAN.STA_AP` this method can get the ssid of board’s own AP plus the AP the STA is connected to in form of a tuple:
+        '''
         ...
 
-    def ifconfig():
+    def ssid(self, ssid: str | None = None) -> str | None:
         ...
 
-    def init():
+    def bssid(self) -> bytes:
         ...
 
-    def isconnected():
+    @overload
+    def auth(self) -> tuple[Literal[1, 2, 3], str] | tuple[Literal[5], str] | None:
+        '''
+        Get the authentication type.
+        '''
         ...
 
-    def joined_ap_info():
+    @overload
+    def auth(self, auth: tuple[Literal[1, 2, 3], str] | tuple[Literal[5], str] | None):
+        '''
+        Set the authentication type when in AP mode.
+        '''
         ...
 
-    def mac():
+    def auth(self, auth: tuple[Literal[1, 2, 3], str] | tuple[Literal[5], str] | None = None) -> tuple[Literal[1, 2, 3], str] | tuple[Literal[5], str] | None:
         ...
 
-    def max_tx_power():
+    @overload
+    def channel(self) -> int:
+        '''
+        - In AP mode, this will get or set the WiFi channel.
+        - In STA mode, this will get the channel.
+        '''
         ...
 
-    def mode():
+    @overload
+    def channel(self, channel: int, secondary_channel=SECONDARY_CHN_NONE):
+        '''
+        - In AP mode, this will get or set the WiFi channel. The secondary channel has no effect.
+        - In STA mode, this will get the channel. Setting the channel is only allowed in Promiscuous mode. A secondary channel can be given as well if the bandwidth is set to `WLAN.HT40`, choosing from the following:
+            - `WLAN.SECONDARY_CHN_ABOVE`: Choose a secondary channel above the currently selected channel
+            - `WLAN.SECONDARY_CHN_BELOW`: Choose a secondary channel below the currently selected channel
+            - `WLAN.SECONDARY_CHN_NONE`: Possible channels are in the range of 1-14, depending on your country settings.
+        '''
         ...
 
-    def promiscuous():
+    def channel(self, channel: int | None = None, secondary_channel=SECONDARY_CHN_NONE) -> int | None:
+        '''
+        - In AP mode, this will get or set the WiFi channel. The secondary channel has no effect.
+        - In STA mode, this will get the channel. Setting the channel is only allowed in Promiscuous mode. A secondary channel can be given as well if the bandwidth is set to `WLAN.HT40`, choosing from the following:
+            - `WLAN.SECONDARY_CHN_ABOVE`: Choose a secondary channel above the currently selected channel
+            - `WLAN.SECONDARY_CHN_BELOW`: Choose a secondary channel below the currently selected channel
+            - `WLAN.SECONDARY_CHN_NONE`: Possible channels are in the range of 1-14, depending on your country settings.
+        '''
         ...
 
-    def scan():
+    @overload
+    def antenna(self) -> int:
+        '''
+        Get the antenna type (external or internal). Value can be:
+
+        - `WLAN.INT_ANT` : The on-board antenna
+        - `WLAN.EXT_ANT` : The U.FL connector (external antenna)
+        - `WLAN.MAN_ANT` : Manually select the state of the antenna switch on `P12` . By default, this will select the on-board antenna
+
+        With our development boards it defaults to using the internal antenna, but in the case of an OEM module, the antenna pin ( `P12` ) is not used, so it’s free to be used for other things.
+        '''
         ...
 
-    def send_raw():
+    @overload
+    def antenna(self, antenna: int) -> None:
+        '''
+        Set the antenna type (external or internal). Value can be:
+
+        - `WLAN.INT_ANT` : The on-board antenna
+        - `WLAN.EXT_ANT` : The U.FL connector (external antenna)
+        - `WLAN.MAN_ANT` : Manually select the state of the antenna switch on `P12` . By default, this will select the on-board antenna
+
+        With our development boards it defaults to using the internal antenna, but in the case of an OEM module, the antenna pin ( `P12` ) is not used, so it’s free to be used for other things.
+        '''
         ...
 
-    def smartConfig():
+    def antenna(self, antenna: int | None = None) -> int | None:
         ...
 
-    def ssid():
+    class _Mac_addresses(NamedTuple):
+        sta_mac: bytes
+        ap_mac: bytes
+
+    @overload
+    def mac(self) -> _Mac_addresses:
+        '''
+        when no arguments are passed a 6-byte long `bytes` tuple object with the WiFI MAC address of both Wifi Station mode and Acces Point mode
+
+        Note: STA and AP cannot have the Same Mac Address
+        '''
         ...
 
-    def wifi_packet():
+    @overload
+    def mac(self, mac: bytearray, mode: int):
+        '''
+        `mac` : a 6 bytes bytearray mac address
+        `mode` : The Interface to set the given MAC address to `WLAN.STA` or `WLAN.AP`
+
+        Ex: To set the mac address of Wifi Station mode:
+
+        ```python
+        wlan.mac(bytearray([0xAE, 0x77, 0x88, 0x99, 0x22, 0x44]), WLAN.STA)
+        ```
+
+        Note: STA and AP cannot have the Same Mac Address
+        '''
         ...
 
-    def wifi_protocol():
+    def mac(self, mac: bytearray | None = None, mode: int | None = None) -> _Mac_addresses | None:
+        ...
+
+    @overload
+    def bandwidth(self) -> int:
+        '''
+        Get the bandwidth of the wifi, either 20 MHz or 40 MHz can be configured, use the following:
+
+        - `WLAN.HT20` : 20MHz
+        - `WLAN.HT40` : 40MHz
+        '''
+        ...
+
+    @overload
+    def bandwidth(self, bw: int) -> bool:
+        '''
+        Set the bandwidth of the wifi, either 20 MHz or 40 MHz can be configured, use the following:
+
+        - `WLAN.HT20` : 20MHz
+        - `WLAN.HT40` : 40MHz
+        '''
+        ...
+
+    def bandwidth(self, bw: int | None = None) -> int | bool:
+        ...
+
+    @overload
+    def hostname(self) -> str:
+        '''
+        Set the Host name of the device connecting to the AP in case of Wifi `mode=WLAN.STA` , in case of `mode=WLAN.AP` this is the name of the host hosting the AP. Max length of name string is 32 Bytes
+        '''
+        ...
+
+    @overload
+    def hostname(self, name: str) -> bool:
+        '''
+        Set the Host name of the device connecting to the AP in case of Wifi `mode=WLAN.STA` , in case of `mode=WLAN.AP` this is the name of the host hosting the AP. Max length of name string is 32 Bytes
+        '''
+        ...
+
+    def hostname(self, name: str | None = None) -> str | bool:
+        ...
+
+    class _Ap_sta_info(NamedTuple):
+        mac: bytes
+        rssi: int
+        wlan_protocol: int
+
+    def ap_sta_list(self) -> list[_Ap_sta_info]:
+        '''
+        Gets an info list of all stations connected to the board’s AP.
+
+        Info returned is a list of tuples containning ([mac address of connected STA], [average rssi value], [Wlan protocol enabled by STA]).
+
+        Protocol types are either : `WLAN.PHY_11_B` , `WLAN.PHY_11_G` , `WLAN.PHY_11_N` or `WLAN.PHY_LOW_RATE`
+        '''
+        ...
+
+    class _Ap_tcpip_sta_info(NamedTuple):
+        mac: bytes
+        IP: str
+
+    def ap_tcpip_sta_list(self) -> list[_Ap_tcpip_sta_info]:
+        '''
+        This API returns with a list of the devices connected to the Pycom board when it is in AP mode.
+        Each element of the returned list is a tuple, containing the MAC address and IP address of the device.
+        '''
+        ...
+
+    @overload
+    def max_tx_power(self) -> int:
+        '''
+        Gets the maximum allowable transmission power for wifi. This is also related to the country setting.
+
+        Packets of different rates are transmitted in different powers according to the configuration in phy init data. This API only sets maximum WiFi transmiting power. If this API is called, the transmiting power of every packet will be less than or equal to the value set by this API.
+
+        Possible values are between 8 and 78, where 8 corresponds to 2dBm and 78 to 20dBm. All values in between increase the maximum output power in 0.25dBm increments.
+        '''
+        ...
+
+    @overload
+    def max_tx_power(self, power: int) -> None:
+        '''
+        Sets the maximum allowable transmission power for wifi. This is also related to the country setting.
+
+        Packets of different rates are transmitted in different powers according to the configuration in phy init data. This API only sets maximum WiFi transmiting power. If this API is called, the transmiting power of every packet will be less than or equal to the value set by this API.
+
+        Values passed in the `power` argument are mapped to transmit power level in dBm. Possible values are between 8 and 78, where 8 corresponds to 2dBm and 78 to 20dBm. All values in between increase the maximum output power in 0.25dBm increments.
+        '''
+        ...
+
+    def max_tx_power(self, power: int | None = None) -> int | None:
+        ...
+
+    class _Country(NamedTuple):
+        country: str
+        schan: int
+        nchan: int
+        max_tx_pwr: int
+        policy: int
+
+    @overload
+    def country(self) -> _Country:
+        '''
+        Gets Country configuration parameters for wifi.
+
+        - `country` That is the country name code , it is max 2 characters string representing the country eg: “CN” for china nad “NL” for Netherlands
+        - `scahn` is the start channel number, in scan process scanning will be performed starting from this channels till the total number of channels. it should be less than or equal 14.
+        - `nchan` is the total number of channels in the specified country. maximum is 14
+        - `max_tx_pwr` Maximum transmission power allowed. see `WLAN.max_tx_power()` for more details.
+        - `policy` Is the method when setting country configuration. Possible options are
+            - `WLAN.COUNTRY_POL_AUTO` in STA mode the wifi will aquire the same country config of the connected AP
+            - `WLAN.COUNTRY_POL_MAN` the configured country parameters will take effect regardless of connected AP.
+        '''
+        ...
+
+    @overload
+    def country(self, *, country: str, schan: int, nchan: int, max_tx_pwr: int = 0, policy: int = COUNTRY_POL_AUTO) -> None:
+        '''
+        Sets Country configuration parameters for wifi.
+
+        - `country` That is the country name code , it is max 2 characters string representing the country eg: “CN” for china nad “NL” for Netherlands
+        - `scahn` is the start channel number, in scan process scanning will be performed starting from this channels till the total number of channels. it should be less than or equal 14.
+        - `nchan` is the total number of channels in the specified country. maximum is 14
+        - `max_tx_pwr` Maximum transmission power allowed. see `WLAN.max_tx_power()` for more details.
+        - `policy` Is the method when setting country configuration. Possible options are
+            - `WLAN.COUNTRY_POL_AUTO` in STA mode the wifi will aquire the same country config of the connected AP
+            - `WLAN.COUNTRY_POL_MAN` the configured country parameters will take effect regardless of connected AP.
+        '''
+        ...
+
+    def country(self, *, country: str | None = None, schan: int | None = None, nchan: int | None = None, max_tx_pwr: int | None = None, policy: int | None = None) -> _Country | None:
+        ...
+
+    class _Joinded_ap_info(NamedTuple):
+        bssid: bytes
+        ssid: str
+        primary_chn: int
+        rssi: int
+        auth: int
+        standard: int
+
+    def joined_ap_info(self) -> _Joinded_ap_info:
+        '''
+        Returns a tuple with `(bssid, ssid, primary channel, rssi, Authorization method, wifi standard used)` of the connected AP in case of STA mode.
+        '''
+        ...
+
+    class _Wifi_protocols(NamedTuple):
+        protocol_11B: bool
+        protocol_11G: bool
+        protocol_11N: bool
+
+    @overload
+    def wifi_protocol(self) -> _Wifi_protocols:
+        '''
+        Sets or gets Wifi Protocol supported in ( `PHY_11_B` , `PHY_11_G` , `PHY_11_N` ) format. Currently 802.11b or 802.11bg or 802.11bgn mode is available.
+        '''
+        ...
+
+    @overload
+    def wifi_protocol(self, _protocols: tuple[bool, bool, bool]):
+        '''
+        Sets or gets Wifi Protocol supported in ( `PHY_11_B` , `PHY_11_G` , `PHY_11_N` ) format. Currently 802.11b or 802.11bg or 802.11bgn mode is available.
+        '''
+        ...
+
+    def wifi_protocol(self, _protocols: tuple[bool, bool, bool] | None = None) -> _Wifi_protocols | None:
+        ...
+
+    def send_raw(self, Buffer: bytes, interface=STA, use_sys_seq=True):
+        '''
+        Send raw data through the Wifi Interface.
+
+        `Buffer` : Buffer of bytes object Containning Data to be transmitted. Data should not be greater than 1500 nor smaller than 24.
+        `interface` : The Interface to use for transmitting Data AP or STA in case the mode used is APSTA. otherwise the interface currently active will be used.
+        `use_sys_seq` : `True` to use the systems next sequance number for sending the data, `False` for keeping the sequance number in the given raw data buffer unchanged.
+        '''
+        ...
+
+    @overload
+    def callback(self, trigger: int, handler: Callable[[Self], None]):
+        '''
+        Register a user callback function `handler` to be called once any of the `trigger` events occures optionally with a passed `arg` . by default the wlan obj is passed as arg to the handler. To unregister the callback you can call the `wlan.callback` function with empty `handler` and `arg` parameters. Possible triggers:
+
+        - `WLAN.EVENT_PKT_MGMT` : Managment packet recieved in promiscuous mode.
+        - `WLAN.EVENT_PKT_CTRL` : Control Packet recieved in promiscuous mode
+        - `WLAN.EVENT_PKT_DATA` : Data packet recieved in promiscuous mode
+        - `WLAN.EVENT_PKT_DATA_MPDU` : MPDU data packet recieved in promiscuous mode
+        - `WLAN.EVENT_PKT_DATA_AMPDU` : AMPDU data packet recieved in promiscuous mode
+        - `WLAN.EVENT_PKT_MISC` : misc paket recieved in promiscuous mode.
+        - `WLAN.EVENT_PKT_ANY` : Any packet recieved in promiscuous mode.
+        - `WLAN.SMART_CONF_DONE` : Smart Config of wifi ssid/pwd Finished
+        - `WLAN.SMART_CONF_TIEMOUT` : Smart Config of wifi ssid/pwd timed-out
+        '''
+        ...
+
+    @overload
+    def callback(self, trigger: int, handler: Callable[[_T], None], arg: _T):
+        '''
+        Register a user callback function `handler` to be called once any of the `trigger` events occures optionally with a passed `arg` . by default the wlan obj is passed as arg to the handler. To unregister the callback you can call the `wlan.callback` function with empty `handler` and `arg` parameters. Possible triggers:
+
+        - `WLAN.EVENT_PKT_MGMT` : Managment packet recieved in promiscuous mode.
+        - `WLAN.EVENT_PKT_CTRL` : Control Packet recieved in promiscuous mode
+        - `WLAN.EVENT_PKT_DATA` : Data packet recieved in promiscuous mode
+        - `WLAN.EVENT_PKT_DATA_MPDU` : MPDU data packet recieved in promiscuous mode
+        - `WLAN.EVENT_PKT_DATA_AMPDU` : AMPDU data packet recieved in promiscuous mode
+        - `WLAN.EVENT_PKT_MISC` : misc paket recieved in promiscuous mode.
+        - `WLAN.EVENT_PKT_ANY` : Any packet recieved in promiscuous mode.
+        - `WLAN.SMART_CONF_DONE` : Smart Config of wifi ssid/pwd Finished
+        - `WLAN.SMART_CONF_TIEMOUT` : Smart Config of wifi ssid/pwd timed-out
+        '''
+        ...
+
+    @overload
+    def callback(self, trigger: int):
+        '''
+        Unregister the callback
+        '''
+        ...
+
+    def callback(self, trigger: int, handler=None, arg=None):
+        ...
+
+    @overload
+    def promiscuous(self) -> bool:
+        '''
+        Gets the WiFi Promiscuous mode.
+        '''
+        ...
+
+    @overload
+    def promiscuous(self, enable: bool):
+        '''
+        Gets or sets WiFi Promiscuous mode.
+
+        Note:
+        - Promiscuous mode should be enabled for Wifi packets types Events to be triggered
+        - for changing wifi channel via `wlan.channel()` promiscuous mode should be enabled.
+
+        Example using promoscious mode:
+
+        ```python
+        from network import WLAN
+        import ubinascii
+
+        def pack_cb(pack):
+            mac = bytearray(6)
+            pk = wlan.wifi_packet()
+            control = pk.data[0]
+            subtype = (0xF0 & control) >> 4
+            type = 0x0C & control
+            #print("Control:{}, subtype:{}, type:{}".format(control, subtype, type))
+            if subtype == 4:
+                for i in range (0,6):
+                    mac[i] = pk.data[10 + i]
+                print ("Wifi Node with MAC: {}".format(ubinascii.hexlify(mac)))
+
+        wlan = WLAN(mode=WLAN.STA, antenna=WLAN.EXT_ANT)
+        wlan.callback(trigger=WLAN.EVENT_PKT_MGMT, handler=pack_cb)
+        wlan.promiscuous(True)
+        w.promiscuous(False)
+        ```
+        '''
+        ...
+
+    def promiscuous(self, enable: bool | None = None) -> bool | None:
+        ...
+
+    def events(self) -> int:
+        '''
+        This function will return an integer object as mask for triggered events.
+        '''
+        ...
+
+    class _Wifi_packet(NamedTuple):
+        rssi: int
+        rate: int
+        sig_mode: int
+        mcs: int
+        cwb: int
+        aggregation: int
+        stbc: int
+        fec_coding: int
+        sgi: int
+        noise_floor: int
+        ampdu_cnt: int
+        channel: int
+        sec_channel: int
+        time_stamp: int
+        ant: int
+        sig_len: int
+        rx_state: int
+        data: bytes
+
+    def wifi_packet(self) -> _Wifi_packet:
+        '''
+        This function will return a tuple with Wifi packet info captured in promiscuous mode.
+        '''
+        ...
+
+    @overload
+    def ctrl_pkt_filter(self) -> int:
+        '''
+        Get the filter mask for Wifi control packets in promiscuous mode. Possible filters:
+
+        - `WLAN.FILTER_CTRL_PKT_ALL` : Filter all Control packets
+        - `WLAN.FILTER_CTRL_PKT_WRAPPER` : Filter control wrapper packets
+        - `WLAN.FILTER_CTRL_PKT_BAR` : Filter Control BAR packets
+        - `WLAN.FILTER_CTRL_PKT_BA` : Filter Control BA packets
+        - `WLAN.FILTER_CTRL_PKT_PSPOLL` : Filter Control PSPOLL Packets
+        - `WLAN.FILTER_CTRL_PKT_CTS` : Filter Control CTS packets
+        - `WLAN.FILTER_CTRL_PKT_ACK` : Filter Control ACK packets
+        - `WLAN.FILTER_CTRL_PKT_CFEND` : Filter Control CFEND Packets
+        - `WLAN.FILTER_CTRL_PKT_CFENDACK` : Filter Control CFENDACK Packets
+        '''
+        ...
+
+    @overload
+    def ctrl_pkt_filter(self, filter: int) -> None:
+        '''
+        Set the filter mask for Wifi control packets in promiscuous mode. Possible filters:
+
+        - `WLAN.FILTER_CTRL_PKT_ALL` : Filter all Control packets
+        - `WLAN.FILTER_CTRL_PKT_WRAPPER` : Filter control wrapper packets
+        - `WLAN.FILTER_CTRL_PKT_BAR` : Filter Control BAR packets
+        - `WLAN.FILTER_CTRL_PKT_BA` : Filter Control BA packets
+        - `WLAN.FILTER_CTRL_PKT_PSPOLL` : Filter Control PSPOLL Packets
+        - `WLAN.FILTER_CTRL_PKT_CTS` : Filter Control CTS packets
+        - `WLAN.FILTER_CTRL_PKT_ACK` : Filter Control ACK packets
+        - `WLAN.FILTER_CTRL_PKT_CFEND` : Filter Control CFEND Packets
+        - `WLAN.FILTER_CTRL_PKT_CFENDACK` : Filter Control CFENDACK Packets
+        '''
+        ...
+
+    def ctrl_pkt_filter(self, filter: int | None = None) -> int | None:
+        ...
+
+    def smartConfig(self):
+        '''
+        Start SmartConfig operation, the smartConfig is a provisioning technique that enables setting Wifi credentials for station mode wirelessly via mobile app.
+
+        Steps:
+        - call `wlan.smartConfig()` (if smartConfig is not enabled on boot or you want to restart smartConfig)
+        - Use mobile App (ESP touch or Pycom App) to set ssid and password for the AP
+        - You can register a callback to be triggered when smart Config is Finished successfuly or times out.
+        '''
+        ...
+
+    def Connected_ap_pwd(self) -> str:
+        '''
+        Get the password of AP the Device is connected to.
+        '''
         ...
 
