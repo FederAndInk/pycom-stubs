@@ -10,7 +10,7 @@ from ._typeshed import (
     SupportsWrite,
 )
 from ast import AST, mod
-from io import FileIO, TextIOWrapper
+from uio import FileIO, TextIOWrapper
 from types import CodeType, TracebackType
 from typing import (
     AbstractSet,
