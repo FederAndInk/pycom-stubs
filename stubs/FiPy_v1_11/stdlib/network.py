@@ -968,7 +968,7 @@ class LTE:
         ...
 
 
-class LoRa_stats(NamedTuple):
+class _LoRa_stats(NamedTuple):
     rx_timestamp: int
     rssi: int
     snr: float
@@ -995,7 +995,9 @@ class LoRa_stats(NamedTuple):
     '''
 
 class LoRa:
-    ''
+    '''
+    Examples on https://docs.pycom.io/tutorials/networks/lora/
+    '''
     ABP = 1
     ALWAYS_ON = 0
     AS923 = 0
@@ -1038,7 +1040,7 @@ class LoRa:
     def reset(self):
         ...
 
-    timeout = None
+    timeout = TimeoutError
 
     @overload
     def tx_power(self, power: int):
@@ -1055,7 +1057,10 @@ class LoRa:
         """
         ...
 
-    def __init__(self, mode, region=LoRa.EU868, frequency: float = None, tx_power: float = None, bandwidth=LoRa.BW_125KHZ, sf=7, preamble=8, coding_rate=LoRa.CODING_4_5, power_mode=LoRa.ALWAYS_ON, tx_iq=False, rx_iq=False, adr=False, public=True, tx_retries=2, device_class=LoRa.CLASS_A):
+    def tx_power(self, power: int | None = None) -> int | None:
+        ...
+
+    def __init__(self, mode, *, region=EU868, frequency: float | None = None, tx_power: float | None = None, bandwidth=BW_125KHZ, sf=7, preamble=8, coding_rate=CODING_4_5, power_mode=ALWAYS_ON, tx_iq=False, rx_iq=False, adr=False, public=True, tx_retries=2, device_class=CLASS_A):
         '''
         Create and configure a LoRa object. See init for params of configuration.
 
@@ -1065,10 +1070,9 @@ class LoRa:
         '''
         ...
 
-    def init(self, mode, region=LoRa.EU868, frequency: float =None, tx_power: float = None, bandwidth=LoRa.BW_125KHZ, sf=7, preamble=8, coding_rate=LoRa.CODING_4_5, power_mode=LoRa.ALWAYS_ON, tx_iq=False, rx_iq=False, adr=False, public=True, tx_retries=2, device_class=LoRa.CLASS_A):
+    def init(self,* , mode, region=EU868, frequency: float | None = None, tx_power: float | None = None, bandwidth=BW_125KHZ, sf=7, preamble=8, coding_rate=CODING_4_5, power_mode=ALWAYS_ON, tx_iq=False, rx_iq=False, adr=False, public=True, tx_retries=2, device_class=CLASS_A):
         '''
         This method is used to set the LoRa subsystem configuration and to specific raw LoRa or LoRaWAN.
-
 
         The arguments are:
 
@@ -1082,7 +1086,6 @@ class LoRa:
             - `LoRa.US915`
             - `LoRa.CN470`
             - `LoRa.IN865`
-
 
         --------
         If no region is provided, it will default to the setting provided in the CONFIG partition, set by the Firmware Updater tool.
@@ -1115,45 +1118,43 @@ class LoRa:
 
         --------
         In `LoRa.LORAWAN` mode, only `adr` , `public` , `tx_retries` and `device_class` are used. All the other params will be ignored as they are handled by the LoRaWAN stack directly. On the other hand, in `LoRa.LORA` mode from those 4 arguments, only the public one is important in order to program the sync word. In `LoRa.LORA` mode `adr` , `tx_retries` and `device_class` are ignored since they are only relevant to the LoRaWAN stack.
-
-
         '''
         ...
 
-    def join(self, activation, auth, timeout=None, dr=None):
+    def join(self, activation: int, *, auth: tuple[bytes | str, bytes | str, bytes | str] | tuple[bytes | str, bytes | str], timeout: int | None = None, dr: int | None = None):
         '''
         Join a LoRaWAN network. Internally the stack will automatically retry every 15 seconds until a Join Accept message is received. The parameters are:
-
-
 
         - `activation` : can be either:
             - `LoRa.OTAA` : Over the Air Activation
             - `LoRa.ABP` : Activation By Personalisation
         - `auth` : is a tuple with the authentication data.
-        - In the case of `LoRa.OTAA` the authentication tuple is: `(dev_eui, app_eui, app_key)` where `dev_eui` is optional. If it is not provided the LoRa MAC will be used.
-        - In the case of `LoRa.ABP` the authentication tuple is: `(dev_addr, nwk_swkey, app_swkey)` .
+            - In the case of `LoRa.OTAA` the authentication tuple is: `(dev_eui, app_eui, app_key)` where `dev_eui` is optional. If it is not provided the LoRa MAC will be used.
+            - In the case of `LoRa.ABP` the authentication tuple is: `(dev_addr, nwk_swkey, app_swkey)` .
         - `timeout` : is the maximum time in milliseconds to wait for the Join Accept message to be received. If no timeout (or zero) is given, the call returns immediately and the status of the join request can be checked with `lora.has_joined()` .
         - `dr` : is an optional value to specify the initial data rate for the Join Request. values are region specific.
         '''
         ...
 
     @overload
-    def frequency(self, frequency):
+    def frequency(self, frequency: int):
         '''
         Get or set the frequency in raw LoRa mode ( `LoRa.LORA` ). The allowed range is region-specific.
-
         '''
         ...
 
     @overload
-    def frequency(self) -> float:
+    def frequency(self) -> int:
         '''
         Get or set the frequency in raw LoRa mode ( `LoRa.LORA` ). The allowed range is region-specific.
-
         '''
         ...
+
+    def frequency(self, frequency: int | None = None) -> int | None:
+        ...
+
     @overload
-    def bandwidth(self, bandwidth):
+    def bandwidth(self, bandwidth: int):
         '''
         Get or set the bandwidth in raw LoRa mode ( `LoRa.LORA` ). Bandwidth can be either: (depending on the region setting)
 
@@ -1162,6 +1163,7 @@ class LoRa:
         - `LoRa.BW_500KHZ`
         '''
         ...
+
     @overload
     def bandwidth(self) -> int:
         '''
@@ -1171,6 +1173,9 @@ class LoRa:
         - `LoRa.BW_250KHZ`
         - `LoRa.BW_500KHZ`
         '''
+        ...
+
+    def bandwidth(self, bandwidth: int | None = None) -> int | None:
         ...
 
     @overload
@@ -1186,7 +1191,7 @@ class LoRa:
         ...
 
     @overload
-    def coding_rate(self, coding_rate):
+    def coding_rate(self, coding_rate: int):
         '''
         Get or set the coding rate in raw LoRa mode ( `LoRa.LORA` ). The allowed values are: (depending on the region setting)
 
@@ -1197,36 +1202,45 @@ class LoRa:
         '''
         ...
 
+    def coding_rate(self, coding_rate: int | None = None) -> int | None:
+        ...
+
     @overload
-    def preamble(self):
+    def preamble(self) -> int:
         '''
         Get or set the number of preamble symbols in raw LoRa mode ( `LoRa.LORA` ).
         '''
         ...
 
     @overload
-    def preamble(self, preamble):
+    def preamble(self, preamble: int):
         '''
         Get or set the number of preamble symbols in raw LoRa mode ( `LoRa.LORA` ).
         '''
         ...
 
+    def preamble(self, preamble: int | None = None) -> int | None:
+        ...
+
     @overload
-    def sf(self):
+    def sf(self) -> Literal[7,8,9,10,11,12]:
         '''
         Get or set the spreading factor value in raw LoRa mode ( `LoRa.LORA` ). The minimum value is 7 and the maximum is 12:
         '''
         ...
 
     @overload
-    def sf(self, sf):
+    def sf(self, sf: Literal[7,8,9,10,11,12]):
         '''
         Get or set the spreading factor value in raw LoRa mode ( `LoRa.LORA` ). The minimum value is 7 and the maximum is 12:
         '''
         ...
 
+    def sf(self, sf: Literal[7,8,9,10,11,12] | None = None) -> Literal[7,8,9,10,11,12] | None:
+        ...
+
     @overload
-    def power_mode(self):
+    def power_mode(self) -> int:
         '''
         Get or set the power mode in raw LoRa mode ( `LoRa.LORA` ). The accepted values are:
 
@@ -1237,7 +1251,7 @@ class LoRa:
         ...
 
     @overload
-    def power_mode(self, power_mode):
+    def power_mode(self, power_mode: int):
         '''
         Get or set the power mode in raw LoRa mode ( `LoRa.LORA` ). The accepted values are:
 
@@ -1247,7 +1261,10 @@ class LoRa:
         '''
         ...
 
-    def stats(self) -> LoRa_stats:
+    def power_mode(self, power_mode: int | None = None) -> int | None:
+        ...
+
+    def stats(self) -> _LoRa_stats:
         '''
         Return a named tuple with useful information from the last received LoRa or LoRaWAN packet. The named tuple has the following form:
 
@@ -1278,7 +1295,7 @@ class LoRa:
         '''
         ...
 
-    def add_channel(self, index, frequency, dr_min, dr_max):
+    def add_channel(self, index: int, *, frequency: int, dr_min: Literal[0,1,2,3,4,5,6,7], dr_max: Literal[0,1,2,3,4,5,6,7]):
         '''
         Add a LoRaWAN channel on the specified `index` . If there’s already a channel with that index it will be replaced with the new one. By default, the regulated LoRaWAN channels are assigned according to the region settings.
 
@@ -1298,7 +1315,7 @@ class LoRa:
         '''
         ...
 
-    def remove_channel(self, index):
+    def remove_channel(self, index: int):
         '''
         Removes the channel from the specified `index` . On EU868, the channels 0 to 2 cannot be removed, they can only be replaced by other channels using the `lora.add_channel` method. A way to remove all channels except for one is to add the same channel, 3 times on indexes 0, 1 and 2.
         '''
@@ -1311,7 +1328,7 @@ class LoRa:
         ...
 
     @overload
-    def callback(self, trigger, handler: Callable[[Self], None]):
+    def callback(self, trigger: int | None, handler: Callable[[Self], None] | None):
         '''
         Specify a callback handler for the LoRa radio. The `trigger` types are
 
@@ -1324,10 +1341,20 @@ class LoRa:
         ...
 
     @overload
-    def callback(self, trigger, handler: Callable[[_T], None], arg: _T):
+    def callback(self, trigger: int, handler: Callable[[_T], None], arg: _T):
         ...
 
-    def ischannel_free(self, rssi_threshold) -> bool:
+    @overload
+    def callback(self, trigger: int | None):
+        '''
+        Unregister the callback
+        '''
+        ...
+
+    def callback(self, trigger: int | None, handler=None, arg=None):
+        ...
+
+    def ischannel_free(self, rssi_threshold: int) -> bool:
         '''
         This method is used to check for radio activity on the current LoRa channel, and if the `rssi` of the measured activity is lower than the `rssi_threshold` given, the return value will be `True` , otherwise `False` . Example:
 
@@ -1337,7 +1364,7 @@ class LoRa:
         '''
         ...
 
-    def set_battery_level(self, level):
+    def set_battery_level(self, level: int):
         '''
         Set the battery level value that will be sent when the LoRaWAN MAC command that retrieves the battery level is received. This command is sent by the network and handled automatically by the LoRaWAN stack. The values should be according to the LoRaWAN specification:
 
@@ -1373,14 +1400,12 @@ class LoRa:
     def nvram_save(self):
         '''
         Save the LoRaWAN state (joined status, network keys, packet counters, etc) in non-volatile memory in order to be able to restore the state when coming out of deepsleep or a power cycle.
-
         '''
         ...
 
     def nvram_restore(self):
         '''
         Restore the LoRaWAN state (joined status, network keys, packet counters, etc) from non-volatile memory. State must have been previously stored with a call to `nvram_save` before entering deepsleep. This is useful to be able to send a LoRaWAN message immediately after coming out of deepsleep without having to join the network again. This can only be used if the current region matches the one saved. Note that the nvram will be cleared after using this method.
-
         '''
         ...
 
@@ -1388,20 +1413,17 @@ class LoRa:
         '''
         Remove the LoRaWAN state (joined status, network keys, packet counters, etc) from non-volatile memory.
 
-
         See the tutorials for an example on how to use nvram
-
         '''
         ...
 
     def mesh(self):
         '''
         Enable the Mesh network. Only after Mesh enabling the `lora.cli()` and `socket` can be used.
-
         '''
         ...
 
-    def cli(self, ip: str):
+    def cli(self, ip: str) -> str:
         '''
         Send OpenThread CLI commands, the list is [here](https://github.com/openthread/openthread/tree/main/src/cli). The output is multiline string, having as line-endings the `\\r\\n` .
 
@@ -1612,7 +1634,7 @@ class WLAN:
         '''
         ...
 
-    def connect(self, ssid, *, auth: tuple[Literal[1, 2, 3], str] | tuple[Literal[5], str] | None = None, bssid: bytes | None = None, timeout: int | None = None, ca_certs: str | None = None, keyfile=None, certfile=None, identity=None, hostname=None):
+    def connect(self, ssid, *, auth: tuple[Literal[1, 2, 3] | int | None, str] | tuple[Literal[5] | int, str, str] | None = None, bssid: bytes | None = None, timeout: int | None = None, ca_certs: str | None = None, keyfile=None, certfile=None, identity=None, hostname=None):
         r'''
         Connect to a WiFi Access Point using the given SSID, and other parameters
 
