@@ -5,8 +5,9 @@ Module: 'network' on FiPy v1.11
 # Stubber: 1.3.2
 
 from collections.abc import Callable
-from typing import Any, NamedTuple, TypeVar, overload, Literal
-from typing_extensions import Self, Unpack, TypedDict, NotRequired
+from typing import Any, Literal, NamedTuple, TypeVar, overload
+
+from typing_extensions import NotRequired, Self, TypedDict, Unpack
 
 _T = TypeVar("_T")
 
@@ -1230,13 +1231,13 @@ class LoRa:
         ...
 
     @overload
-    def sf(self, sf: Literal[7,8,9,10,11,12]):
+    def sf(self, sf: Literal[7, 8, 9, 10, 11, 12] | int):
         '''
         Get or set the spreading factor value in raw LoRa mode ( `LoRa.LORA` ). The minimum value is 7 and the maximum is 12:
         '''
         ...
 
-    def sf(self, sf: Literal[7,8,9,10,11,12] | None = None) -> Literal[7,8,9,10,11,12] | None:
+    def sf(self, sf: Literal[7, 8, 9, 10, 11, 12] | int | None = None) -> Literal[7, 8, 9, 10, 11, 12] | None:
         ...
 
     @overload
@@ -1295,7 +1296,7 @@ class LoRa:
         '''
         ...
 
-    def add_channel(self, index: int, *, frequency: int, dr_min: Literal[0,1,2,3,4,5,6,7], dr_max: Literal[0,1,2,3,4,5,6,7]):
+    def add_channel(self, index: int, *, frequency: int, dr_min: Literal[0, 1, 2, 3, 4, 5, 6, 7] | int, dr_max: Literal[0, 1, 2, 3, 4, 5, 6, 7] | int):
         '''
         Add a LoRaWAN channel on the specified `index` . If there’s already a channel with that index it will be replaced with the new one. By default, the regulated LoRaWAN channels are assigned according to the region settings.
 
@@ -1586,7 +1587,7 @@ class WLAN:
     WPA2 = 3
     WPA2_ENT = 5
 
-    def __init__(self, id=0, *, mode: int = STA, ssid: str = "", auth: tuple[Literal[1, 2, 3], str] | tuple[Literal[5], str] | None = None, channel=1, antenna=MAN_ANT, power_save=False, hidden=False, bandwidth=HT40, max_tx_pwr=78, country='CN', protocol: tuple[bool, bool, bool] = (True, True, True)):
+    def __init__(self, id=0, *, mode: int = STA, ssid: str = "", auth: tuple[Literal[1, 2, 3] | int | None, str] | tuple[Literal[5] | int, str, str] | None = None, channel=1, antenna=MAN_ANT, power_save=False, hidden=False, bandwidth=HT40, max_tx_pwr=78, country='CN', protocol: tuple[bool, bool, bool] = (True, True, True)):
         '''
         Create a WLAN object, and optionally configure it. See init for params of configuration.
 
@@ -1595,7 +1596,7 @@ class WLAN:
         '''
         ...
 
-    def init(self, *, mode: int = STA, ssid: str = "", auth: tuple[Literal[1, 2, 3], str] | tuple[Literal[5], str] | None = None, channel=1, antenna=MAN_ANT, power_save=False, hidden=False, bandwidth=HT40, max_tx_pwr=78, country='CN', protocol: tuple[bool, bool, bool] = (True, True, True)):
+    def init(self, *, mode: int = STA, ssid: str = "", auth: tuple[Literal[1, 2, 3] | int | None, str] | tuple[Literal[5] | int, str, str] | None = None, channel=1, antenna=MAN_ANT, power_save=False, hidden=False, bandwidth=HT40, max_tx_pwr=78, country='CN', protocol: tuple[bool, bool, bool] = (True, True, True)):
         '''
         Set or get the WiFi network processor configuration.
 
@@ -1774,20 +1775,20 @@ class WLAN:
         ...
 
     @overload
-    def auth(self) -> tuple[Literal[1, 2, 3], str] | tuple[Literal[5], str] | None:
+    def auth(self) -> tuple[Literal[1, 2, 3] | None, str] | tuple[Literal[5], str, str] | None:
         '''
         Get the authentication type.
         '''
         ...
 
     @overload
-    def auth(self, auth: tuple[Literal[1, 2, 3], str] | tuple[Literal[5], str] | None):
+    def auth(self, auth: tuple[Literal[1, 2, 3] | int | None, str] | tuple[Literal[5] | int, str, str] | None):
         '''
         Set the authentication type when in AP mode.
         '''
         ...
 
-    def auth(self, auth: tuple[Literal[1, 2, 3], str] | tuple[Literal[5], str] | None = None) -> tuple[Literal[1, 2, 3], str] | tuple[Literal[5], str] | None:
+    def auth(self, auth: tuple[Literal[1, 2, 3] | int | None, str] | tuple[Literal[5] | int, str, str] | None = None) -> tuple[Literal[1, 2, 3] | None, str] | tuple[Literal[5], str, str] | None:
         ...
 
     @overload
