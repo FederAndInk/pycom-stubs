@@ -15,7 +15,12 @@ def timezone() -> int:
 def timezone(h: int):
     ...
 
-def gmtime(secs: Optional[int] = None) -> tuple:
+
+def timezone(h: int | None = None) -> int | None:
+    ...
+
+
+def gmtime(secs: Optional[int] = None) -> tuple[int, int, int, int, int, int, int, int]:
     """
     Converts a time expressed in seconds since the Epoch into an 8-tuple which
     contains:
@@ -37,7 +42,7 @@ def gmtime(secs: Optional[int] = None) -> tuple:
     ...
 
 
-def localtime(secs: Optional[int] = None) -> tuple:
+def localtime(secs: Optional[int] = None) -> tuple[int, int, int, int, int, int, int, int]:
     """
     Converts a time expressed in seconds since the Epoch into an 8-tuple which
     contains:
@@ -59,7 +64,7 @@ def localtime(secs: Optional[int] = None) -> tuple:
     ...
 
 
-def mktime(local_time: tuple) -> int:
+def mktime(local_time: tuple[int, int, int, int, int, int, int, int]) -> int:
     """
     This is inverse function of localtime. Its argument is a full 8-tuple
     which expresses a time as per localtime. It returns an integer which is
