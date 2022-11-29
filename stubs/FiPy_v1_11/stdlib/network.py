@@ -67,7 +67,7 @@ class GATTCCharacteristic:
         ...
 
     @overload
-    def callback(self, trigger: int, handler: Callable[[Self, _Char_callback_data], None]):
+    def callback(self, trigger: int, handler: Callable[[Self, tuple[int, bytes]], None]):
         '''
         Creates a callback that will be executed when any of the triggers occur. The arguments are:
 
@@ -85,7 +85,7 @@ class GATTCCharacteristic:
         ...
 
     @overload
-    def callback(self, trigger: int, handler: Callable[[_T, _Char_callback_data], None], arg: _T):
+    def callback(self, trigger: int, handler: Callable[[_T, tuple[int, bytes]], None], arg: _T):
         '''
         Creates a callback that will be executed when any of the triggers occur. The arguments are:
 
@@ -675,7 +675,7 @@ class Bluetooth:
         '''
         ...
 
-    def connect(self, mac_addr: str, *, timeout: int | None = None) -> GATTCConnection:
+    def connect(self, mac_addr: str | bytes, *, timeout: int | None = None) -> GATTCConnection:
         '''
         - `mac_addr` is the address of the remote device to connect
         - `timeout` specifies the amount of time in milliseconds to wait for the connection process to finish. If not given then no timeout is applied The function blocks until the connection succeeds or fails (raises OSError) or the given `timeout` expires (raises `Bluetooth.timeout TimeoutError`). If the connections succeeds it returns a object of type `GATTCConnection`.
