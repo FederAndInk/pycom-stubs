@@ -1,0 +1,9 @@
+class PybytesConfig:
+  def smart_config(self):
+    ...
+
+  def cli_config(self):
+    ...
+
+  def read_config(self) -> dict:
+    ...
