@@ -15,7 +15,10 @@ machine.unique_id() # return the 6-byte unique id of the board (the LoPy's WiFi 
 # MCU: (sysname='FiPy', nodename='FiPy', release='1.20.2.r6', version='v1.11-c5a0a97 on 2021-10-28', machine='FiPy with ESP32', lorawan='1.0.2', sigfox='1.0.1', pybytes='1.7.1')
 # Stubber: 1.3.2
 
-from typing import overload
+from typing import overload, Callable, TypeVar
+from typing_extensions import Self
+
+_T = TypeVar('_T')
 
 
 PWRON_RESET = 0
@@ -242,7 +245,7 @@ class Pin:
     exp_board: board
     module: cpu
 
-    def __init__(self, id: str, mode=Pin.OUT, pull=None, alt=-1):
+    def __init__(self, id: str, mode=OUT, pull: int | None = None, alt=-1):
         '''
         Create a new Pin object associated with the string `id` . If additional arguments are given, they are used to initialise the pin. See pin.init()
 
@@ -254,7 +257,7 @@ class Pin:
         '''
         ...
 
-    def init(self, mode, pull, *, alt):
+    def init(self, mode: int, pull: int | None, *, alt: int | str):
         '''
         Initialise the pin:
 
@@ -272,14 +275,14 @@ class Pin:
             - Pin value: `0` or `1`
 
         - `alt` is the id of the alternate function.
+
         Returns: `None` .
         '''
         ...
 
-    def id(self):
+    def id(self) -> str:
         '''
         Get the pin id.
-
         '''
         ...
 
@@ -301,6 +304,9 @@ class Pin:
         - `True` or 1: High
         - `False` or 0: Low
         '''
+        ...
+
+    def value(self, value: bool | int | None = None) -> bool | int | None:
         ...
 
     @overload
@@ -341,10 +347,12 @@ class Pin:
         '''
         ...
 
+    def __call__(self, value: bool | int | None = None) -> bool | int | None:
+        ...
+
     def toggle(self):
         '''
         Toggle the value of the pin.
-
         '''
         ...
 
@@ -370,6 +378,9 @@ class Pin:
         '''
         ...
 
+    def mode(self, mode: int | None = None) -> int | None:
+        ...
+
     @overload
     def pull(self) -> int:
         '''
@@ -392,8 +403,11 @@ class Pin:
         '''
         ...
 
+    def pull(self, pull: int | None = None) -> int | None:
+        ...
+
     @overload
-    def hold(self, hold) -> bool:
+    def hold(self) -> bool:
         '''
         Get or set the pin hold. This functionality can be used to hold a pin’s state after deepsleep, `machine.reset()` or a watchdog timer reset. Passing `True` will hold the current value of the pin, `False` will release the hold state. When a pin is in hold state, its value cannot be changed by using `Pin.value()` or `Pin.toggle()` , until the hold is released. Only pins in the RTC power domain can retain their value through deep sleep or reset. These are: `P2, P3, P4, P6, P8, P9, P10, P13, P14, P15, P16, P17, P18, P19, P20, P21, P22, P23`
 
@@ -464,11 +478,13 @@ class Pin:
         '''
         ...
 
-    def callback(self, trigger,handler=None,arg=None):
+    def hold(self, hold: bool | None = None) -> bool | None:
+        ...
+
+    @overload
+    def callback(self, trigger: int, handler: Callable[[_T], None], arg: _T):
         '''
         Set a callback to be triggered when the input level at the pin changes.
-
-
 
         - `trigger` is the type of event that triggers the callback. Possible values are:
             - `Pin.IRQ_FALLING` interrupt on falling edge.
@@ -493,9 +509,61 @@ class Pin:
         p_in = Pin('P10', mode=Pin.IN, pull=Pin.PULL_UP)
         p_in.callback(Pin.IRQ_FALLING | Pin.IRQ_RISING, pin_handler)
         ```
+
         --------
-        For more information on how Pycom’s products handle interrupts, see here.
+        For more information on how Pycom’s products handle interrupts, see [here](https://docs.pycom.io/firmwareapi/notes/#interrupt-handling).
         '''
+        ...
+
+    @overload
+    def callback(self, trigger: int, handler: Callable[[Self], None]):
+        '''
+        Set a callback to be triggered when the input level at the pin changes.
+
+        - `trigger` is the type of event that triggers the callback. Possible values are:
+            - `Pin.IRQ_FALLING` interrupt on falling edge.
+            - `Pin.IRQ_RISING` interrupt on rising edge.
+            - `Pin.IRQ_LOW_LEVEL` interrupt on low level.
+            - `Pin.IRQ_HIGH_LEVEL` interrupt on high level.
+
+        The values can be OR-ed together, for instance `trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING`
+
+        - `handler` is the function to be called when the event happens. This function will receive one argument. Set `handler` to `None` to disable it.
+        - `arg` is an optional argument to pass to the callback. If left empty or set to `None` , the function will receive the Pin object that triggered it.
+
+        Example:
+
+        ```python
+
+        from machine import Pin
+
+        def pin_handler(arg):
+            print("got an interrupt in pin %s" % (arg.id()))
+
+        p_in = Pin('P10', mode=Pin.IN, pull=Pin.PULL_UP)
+        p_in.callback(Pin.IRQ_FALLING | Pin.IRQ_RISING, pin_handler)
+        ```
+
+        --------
+        For more information on how Pycom’s products handle interrupts, see [here](https://docs.pycom.io/firmwareapi/notes/#interrupt-handling).
+        '''
+        ...
+
+    @overload
+    def callback(self, trigger: int):
+        '''
+        remove callbacks specified by `trigger`
+        '''
+        ...
+
+    @overload
+    def callback(self):
+        '''
+        remove all callbacks
+        '''
+        ...
+
+    def callback(self, trigger: int | None = None, handler=None, arg=None):
         ...
 
 class RMT:
