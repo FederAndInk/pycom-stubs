@@ -15,7 +15,7 @@ machine.unique_id() # return the 6-byte unique id of the board (the LoPy's WiFi 
 # MCU: (sysname='FiPy', nodename='FiPy', release='1.20.2.r6', version='v1.11-c5a0a97 on 2021-10-28', machine='FiPy with ESP32', lorawan='1.0.2', sigfox='1.0.1', pybytes='1.7.1')
 # Stubber: 1.3.2
 
-from typing import overload, Callable, TypeVar
+from typing import overload, Callable, TypeVar, Any
 from typing_extensions import Self
 
 _T = TypeVar('_T')
@@ -683,7 +683,8 @@ class Timer:
         For more information on how Pycom’s products handle interrupts, see [notes](https://docs.pycom.io/firmwareapi/notes/#interrupt-handling).
         '''
 
-        def __init__(self, handler, s: float | None = None, ms: int | None = None, us: int | None = None, arg=None, periodic=False):
+        @overload
+        def __init__(self, handler: Callable[[Self], None], s: float | None = None, *, ms: int | None = None, us: int | None = None, periodic=False):
             '''
             Create an Alarm object.
 
@@ -694,7 +695,40 @@ class Timer:
             '''
             ...
 
-        def callback(self, handler, arg=None):
+        @overload
+        def __init__(self, handler: Callable[[_T], None], s: float | None = None, *, ms: int | None = None, us: int | None = None, arg: _T, periodic=False):
+            '''
+            Create an Alarm object.
+
+            - `handler` : will be called after the interval has elapsed. If set to `None` , the alarm will be disabled after creation.
+            - `arg` : an optional argument can be passed to the callback handler function. If `None` is specified, the function will receive the object that triggered the alarm.
+            - `s, ms, us` : the interval can be specified in seconds (float), miliseconds (integer) or microseconds (integer). Only one at a time can be specified.
+            - `periodic` : an alarm can be set to trigger repeatedly by setting this parameter to `True` .
+            '''
+            ...
+
+        def __init__(self, handler: Callable[[Any], None], s: float | None = None, *, ms: int | None = None, us: int | None = None, arg = None, periodic=False):
+            ...
+
+        @overload
+        def callback(self, handler: Callable[[Self], None] | None):
+            ...
+            '''
+            Specify a callback handler for the alarm. If set to `None` , the alarm will be disabled.
+
+            An optional argument `arg` can be passed to the callback handler function. If `None` is specified, the function will receive the object that triggered the alarm.
+            '''
+
+        @overload
+        def callback(self, handler: Callable[[_T], None] | None, arg: _T):
+            '''
+            Specify a callback handler for the alarm. If set to `None` , the alarm will be disabled.
+
+            An optional argument `arg` can be passed to the callback handler function. If `None` is specified, the function will receive the object that triggered the alarm.
+            '''
+            ...
+
+        def callback(self, handler: None | Callable[[Any], None], arg=None):
             '''
             Specify a callback handler for the alarm. If set to `None` , the alarm will be disabled.
 
